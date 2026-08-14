@@ -9,6 +9,7 @@ export function Section({
   icon,
   children,
   className,
+  bare = false,
 }: {
   title: string;
   subtitle?: string;
@@ -16,9 +17,12 @@ export function Section({
   icon?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  /** Skip the built-in `container py-8` wrapper — use when the section is
+   * already placed inside a container (e.g. a column of a grid layout). */
+  bare?: boolean;
 }) {
   return (
-    <section className={cn("container py-8", className)}>
+    <section className={cn(!bare && "container py-8", className)}>
       <div className="mb-5 flex items-end justify-between">
         <div>
           <h2 className="flex items-center gap-2 font-display text-2xl font-bold text-foreground">

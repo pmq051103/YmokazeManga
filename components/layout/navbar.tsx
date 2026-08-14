@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,9 +14,10 @@ import { mangaApi } from "@/lib/api";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { useTheme } from "@/providers/theme-provider";
 import { cn } from "@/lib/utils/cn";
+import { GenreMenu } from "@/components/layout/genre-menu";
 
 const NAV_LINKS = [
-  { href: "/manga", label: "Danh sách" },
+  { href: "/", label: "Trang chủ" },
   { href: "/manga?sort=newest", label: "Mới cập nhật" },
   { href: "/bookmarks", label: "Yêu thích" },
   { href: "/history", label: "Lịch sử" },
@@ -65,14 +67,16 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((l) => (
-            <Link
-              key={l.label}
-              href={l.href}
-              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-lilac-50 hover:text-lilac-700"
-            >
-              {l.label}
-            </Link>
+          {NAV_LINKS.map((l, i) => (
+            <React.Fragment key={l.label}>
+              <Link
+                href={l.href}
+                className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-lilac-50 hover:text-lilac-700"
+              >
+                {l.label}
+              </Link>
+              {i === 0 && <GenreMenu />}
+            </React.Fragment>
           ))}
         </nav>
 
@@ -171,17 +175,27 @@ export function Navbar() {
             className="overflow-hidden border-t border-lilac-100 bg-white md:hidden"
           >
             <nav className="container flex flex-col gap-1 py-3">
-              {NAV_LINKS.map((l) => (
-                <Link
-                  key={l.label}
-                  href={l.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-lilac-50"
+              {NAV_LINKS.map((l, i) => (
+                <React.Fragment key={l.label}>
+                  <Link
+                    href={l.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-lilac-50"
+                    )}
+                  >
+                    {l.label}
+                  </Link>
+                  {i === 0 && (
+                    <Link
+                      href="/manga"
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-lilac-50"
+                    >
+                      Thư viện thể loại
+                    </Link>
                   )}
-                >
-                  {l.label}
-                </Link>
+                </React.Fragment>
               ))}
               <button
                 onClick={toggleTheme}

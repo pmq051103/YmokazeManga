@@ -1,81 +1,149 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
-import { Sparkles, BookOpen } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MangaSummary } from "@/lib/api";
+import { cn } from "@/lib/utils/cn";
 
-export function HeroBanner({ featured }: { featured?: MangaSummary }) {
+const STATUS_LABEL: Record<string, string> = {
+  ongoing: "Đang tiến hành",
+  completed: "Hoàn thành",
+  hiatus: "Tạm ngưng",
+  unknown: "",
+};
+
+export function HeroBanner({ items }: { items: MangaSummary[] }) {
+  const slides = items.slice(0, 5);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: slides.length > 1 });
+  const [selected, setSelected] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelected(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+  }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    if (!emblaApi || slides.length < 2) return;
+    const timer = setInterval(() => emblaApi.scrollNext(), 6000);
+    return () => clearInterval(timer);
+  }, [emblaApi, slides.length]);
+
+  if (slides.length === 0) return null;
+
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-sakura-200/50 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 top-32 h-72 w-72 rounded-full bg-skyy-200/50 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/3 -top-10 h-56 w-56 rounded-full bg-lilac-200/50 blur-3xl" />
+    <section className="relative w-full overflow-hidden bg-foreground/5">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {slides.map((manga, i) => (
+            <div key={`${manga.source}-${manga.id}`} className="relative min-w-0 flex-[0_0_100%]">
+              <div className="relative h-[340px] w-full sm:h-[400px] md:h-[460px] lg:h-[520px]">
+                <Image
+                  src={manga.coverUrl}
+                  alt={manga.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority={i === 0}
+                  unoptimized
+                />
+                {/* readability gradients */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                <div className="absolute inset-0 hidden bg-gradient-to-r from-black/80 via-black/20 to-transparent md:block" />
 
-      <div className="container relative grid gap-10 py-14 md:grid-cols-2 md:items-center md:py-20">
-        <motion.div
-          initial={{ opacity: 0, x: -24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-lilac-600 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" /> Cập nhật mỗi ngày
-          </span>
-          <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight text-foreground sm:text-5xl">
-            Đắm chìm trong thế giới{" "}
-            <span className="text-gradient">manga &amp; manhwa</span>
-          </h1>
-          <p className="mt-4 max-w-md text-muted-foreground">
-            Hàng ngàn bộ truyện, cập nhật nhanh, đọc mượt trên mọi thiết bị — giao diện
-            sáng, nhẹ nhàng như một trang artbook.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href="/manga">
-                <BookOpen className="h-4 w-4" /> Khám phá ngay
-              </Link>
-            </Button>
-            {featured && (
-              <Button asChild size="lg" variant="outline">
-                <Link href={`/manga/${featured.slug}?src=${featured.source}`}>
-                  Xem truyện nổi bật
-                </Link>
-              </Button>
-            )}
-          </div>
-        </motion.div>
+                <div className="container relative flex h-full items-end pb-10 md:items-center md:pb-0">
+                  <motion.div
+                    key={selected === i ? "active" : `inactive-${i}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="max-w-xl"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      {manga.status !== "unknown" && (
+                        <Badge variant="pink" className="bg-white/90 text-sakura-600 shadow-sm">
+                          {STATUS_LABEL[manga.status]}
+                        </Badge>
+                      )}
+                      {manga.genres.slice(0, 3).map((g) => (
+                        <Badge key={g.id} variant="outline" className="border-white/40 text-white/90">
+                          {g.name}
+                        </Badge>
+                      ))}
+                    </div>
 
-        {featured && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative mx-auto w-56 sm:w-64"
-          >
-            <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-sakura-200 via-lilac-200 to-skyy-200 blur-xl" />
-            <div className="relative animate-float">
-              <div className="overflow-hidden rounded-[1.75rem] border-4 border-white shadow-glow">
-                <div className="relative aspect-[3/4]">
-                  <Image
-                    src={featured.coverUrl}
-                    alt={featured.title}
-                    fill
-                    className="object-cover"
-                    sizes="260px"
-                    unoptimized
-                    priority
-                  />
+                    <h1 className="mt-3 font-display text-2xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-3xl md:text-4xl lg:text-5xl">
+                      {manga.title}
+                    </h1>
+
+                    {manga.latestChapter && (
+                      <p className="mt-2 text-sm font-medium text-white/80 md:text-base">
+                        Cập nhật: {manga.latestChapter}
+                      </p>
+                    )}
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <Button asChild size="lg">
+                        <Link href={`/manga/${manga.slug}?src=${manga.source}`}>
+                          <BookOpen className="h-4 w-4" /> Đọc ngay
+                        </Link>
+                      </Button>
+                      <Button asChild size="lg" variant="outline" className="border-white/50 bg-white/10 text-white hover:bg-white/20">
+                        <Link href="/manga">Khám phá thêm</Link>
+                      </Button>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-              <div className="absolute -bottom-4 left-1/2 w-[85%] -translate-x-1/2 rounded-xl bg-white px-3 py-2 text-center shadow-soft">
-                <p className="truncate text-xs font-semibold text-foreground">{featured.title}</p>
-              </div>
             </div>
-          </motion.div>
-        )}
+          ))}
+        </div>
       </div>
+
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={() => emblaApi?.scrollPrev()}
+            aria-label="Ảnh trước"
+            className="absolute left-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/30 sm:flex"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => emblaApi?.scrollNext()}
+            aria-label="Ảnh tiếp theo"
+            className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/30 sm:flex"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => emblaApi?.scrollTo(i)}
+                aria-label={`Đến ảnh ${i + 1}`}
+                className={cn(
+                  "h-1.5 rounded-full bg-white/50 transition-all duration-300",
+                  selected === i ? "w-6 bg-white" : "w-1.5 hover:bg-white/80"
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 }

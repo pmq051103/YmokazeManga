@@ -37,7 +37,13 @@ export function MangaCard({ manga, priority = false }: { manga: MangaSummary; pr
             priority={priority}
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 group-hover:opacity-100">
+            <span className="flex scale-90 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-lilac-600 shadow-soft transition-transform duration-300 group-hover:scale-100">
+              <BookOpen className="h-3.5 w-3.5" /> Đọc ngay
+            </span>
+          </div>
 
           {manga.status !== "unknown" && (
             <Badge
