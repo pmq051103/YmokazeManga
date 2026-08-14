@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   },
   description:
     "Yomikaze là nền tảng đọc manga, manhwa, manhua online miễn phí — cập nhật nhanh, giao diện sáng, mượt mà trên mọi thiết bị.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "Yomikaze — Đọc Manga & Truyện Tranh Online",
     description:

@@ -74,14 +74,14 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 border-b border-lilac-100/70 bg-white/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sakura-400 to-lilac-500 text-lg font-display font-bold text-white shadow-card">
-            未
-          </span>
-          <span className="font-display text-xl font-bold text-gradient hidden sm:inline">
-            Yomikaze
-          </span>
-        </Link>
+          <Link href="/" className="flex shrink-0 items-center gap-2">
+            <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl">
+              <Image src="/logo.png" alt="Yomikaze" fill className="object-contain" sizes="36px" />
+            </span>
+            <span className="font-display text-xl font-bold text-gradient hidden sm:inline">
+              Yomikaze
+            </span>
+          </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l, i) => (
