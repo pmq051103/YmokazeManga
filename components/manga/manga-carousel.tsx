@@ -30,7 +30,7 @@ export function MangaCarousel({ items }: { items: MangaSummary[] }) {
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex gap-4">
           {items.map((m, i) => (
-            <div key={`${m.source}-${m.id}`} className="w-[42%] shrink-0 sm:w-[26%] md:w-[19%] lg:w-[15%]">
+            <div key={`${m.source}-${m.id}`} className="w-[30%] shrink-0 sm:w-[24%] md:w-[19%] lg:w-[15%]">
               <MangaCard manga={m} priority={i < 4} />
             </div>
           ))}

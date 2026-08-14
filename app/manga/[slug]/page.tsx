@@ -2,12 +2,13 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
-import { BookOpen, User2 } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { mangaApi, MangaSource } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChapterList } from "@/components/manga/chapter-list";
 import { BookmarkButton } from "@/components/manga/bookmark-button";
+import { MangaInfo } from "@/components/manga/manga-info";
 import { MangaGrid } from "@/components/manga/manga-grid";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -86,19 +87,12 @@ export default async function MangaDetailPage({ params, searchParams }: PageProp
             <Badge variant={manga.status === "completed" ? "success" : "pink"}>
               {STATUS_LABEL[manga.status]}
             </Badge>
-            <Badge variant="outline">Nguồn: {manga.source === "otruyen" ? "OTruyen" : "MangaDex"}</Badge>
           </div>
 
           <h1 className="font-display text-3xl font-bold text-foreground">{manga.title}</h1>
 
           {manga.altTitles.length > 0 && (
             <p className="mt-1 text-sm text-muted-foreground">{manga.altTitles.join(" · ")}</p>
-          )}
-
-          {manga.author.length > 0 && (
-            <p className="mt-3 flex items-center gap-1.5 text-sm text-foreground">
-              <User2 className="h-4 w-4 text-lilac-400" /> {manga.author.join(", ")}
-            </p>
           )}
 
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -109,6 +103,10 @@ export default async function MangaDetailPage({ params, searchParams }: PageProp
                 </Badge>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-5">
+            <MangaInfo manga={manga} />
           </div>
 
           <p className="mt-5 max-w-2xl whitespace-pre-line text-sm leading-relaxed text-muted-foreground">

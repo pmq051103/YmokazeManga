@@ -34,6 +34,8 @@ interface MdMangaAttributes {
   status: string;
   tags: MdTag[];
   updatedAt: string;
+  createdAt: string;
+  year: number | null;
 }
 
 interface MdMangaItem {
@@ -133,6 +135,8 @@ function mapDetail(item: MdMangaItem, chapters: Chapter[]): MangaDetail {
     description: desc?.en ?? Object.values(desc ?? {})[0] ?? "",
     author: authorNames(item.relationships),
     chapters,
+    year: item.attributes.year ?? undefined,
+    createdAt: item.attributes.createdAt,
   };
 }
 

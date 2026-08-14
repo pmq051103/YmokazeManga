@@ -32,7 +32,7 @@ export function MangaCard({ manga, priority = false }: { manga: MangaSummary; pr
             src={manga.coverUrl}
             alt={manga.title}
             fill
-            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
+            sizes="(max-width: 640px) 31vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 160px"
             className="object-cover transition-transform duration-500 group-hover:scale-110"
             priority={priority}
             unoptimized

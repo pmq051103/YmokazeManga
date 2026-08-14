@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { Loader2, SlidersHorizontal } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { SlidersHorizontal } from "lucide-react";
 import { mangaApi, MangaListParams } from "@/lib/api";
 import { MangaGrid, MangaGridSkeleton } from "@/components/manga/manga-grid";
+import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
@@ -26,12 +27,12 @@ const STATUS_OPTIONS = [
 export default function MangaListingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const genre = searchParams.get("genre") ?? "";
   const genreLabel = searchParams.get("label") ?? "";
   const status = (searchParams.get("status") ?? "") as MangaListParams["status"] | "";
   const sort = (searchParams.get("sort") ?? "updated") as NonNullable<MangaListParams["sort"]>;
+  const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1);
 
   const { data: genresData } = useQuery({ queryKey: ["genres"], queryFn: () => mangaApi.genres() });
 
@@ -40,39 +41,31 @@ export default function MangaListingPage() {
     if (value) next.set(key, value);
     else next.delete(key);
     if (key === "genre") next.delete("label");
+    next.delete("page");
     router.push(`/manga?${next.toString()}`);
   }
 
-  const queryKey = useMemo(() => ["manga-list", { genre, status, sort }], [genre, status, sort]);
+  function goToPage(p: number) {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("page", String(p));
+    router.push(`/manga?${next.toString()}`);
+  }
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteQuery({
-      queryKey,
-      queryFn: ({ pageParam = 1 }) =>
-        genre
-          ? mangaApi.listByGenre(genre, pageParam)
-          : mangaApi.list({ page: pageParam, status: status || undefined, sort }),
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) =>
-        lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
-    });
+  const queryKey = useMemo(() => ["manga-list", { genre, status, sort, page }], [genre, status, sort, page]);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey,
+    queryFn: () =>
+      genre
+        ? mangaApi.listByGenre(genre, page)
+        : mangaApi.list({ page, status: status || undefined, sort }),
+  });
 
   useEffect(() => {
-    const el = loadMoreRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "400px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+    window.scrollTo({ top: 0 });
+  }, [page, genre, status, sort]);
 
-  const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const items = data?.items ?? [];
 
   return (
     <div className="container py-8">
@@ -85,10 +78,14 @@ export default function MangaListingPage() {
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-lilac-100 bg-white/70 p-4 shadow-sm">
-        <SlidersHorizontal className="h-4 w-4 text-lilac-500" />
+      <div className="mb-6 flex flex-col items-stretch gap-3 rounded-2xl border border-lilac-100 bg-white/70 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex items-center gap-2 sm:hidden">
+          <SlidersHorizontal className="h-4 w-4 shrink-0 text-lilac-500" />
+          <span className="text-sm font-semibold text-foreground">Bộ lọc</span>
+        </div>
+        <SlidersHorizontal className="hidden h-4 w-4 text-lilac-500 sm:block" />
 
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Select value={genre} onChange={(e) => updateParam("genre", e.target.value)}>
             <option value="">Tất cả thể loại</option>
             {genresData?.items.map((g) => (
@@ -99,7 +96,7 @@ export default function MangaListingPage() {
           </Select>
         </div>
 
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Select value={status} onChange={(e) => updateParam("status", e.target.value)}>
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -109,7 +106,7 @@ export default function MangaListingPage() {
           </Select>
         </div>
 
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Select value={sort} onChange={(e) => updateParam("sort", e.target.value)}>
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -120,7 +117,7 @@ export default function MangaListingPage() {
         </div>
 
         {(genre || status || sort !== "updated") && (
-          <Button variant="ghost" size="sm" onClick={() => router.push("/manga")}>
+          <Button variant="ghost" size="sm" className="w-full sm:w-auto" onClick={() => router.push("/manga")}>
             Xóa bộ lọc
           </Button>
         )}
@@ -136,12 +133,14 @@ export default function MangaListingPage() {
 
       {!isLoading && !isError && <MangaGrid items={items} />}
 
-      <div ref={loadMoreRef} className="mt-8 flex justify-center">
-        {isFetchingNextPage && <Loader2 className="h-6 w-6 animate-spin text-lilac-400" />}
-        {!hasNextPage && items.length > 0 && (
-          <p className="text-sm text-muted-foreground">Đã hiển thị toàn bộ kết quả.</p>
-        )}
-      </div>
+      {!isLoading && !isError && data && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          onPageChange={goToPage}
+          className="mt-8"
+        />
+      )}
     </div>
   );
 }

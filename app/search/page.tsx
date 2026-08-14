@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { mangaApi } from "@/lib/api";
 import { MangaGrid, MangaGridSkeleton } from "@/components/manga/manga-grid";
-import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -37,23 +37,13 @@ export default function SearchPage() {
 
       {!isLoading && !isError && data && <MangaGrid items={data.items} />}
 
-      {data && data.totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Trang trước
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Trang {page} / {data.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Trang sau
-          </Button>
-        </div>
+      {!isLoading && !isError && data && data.totalPages > 1 && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          onPageChange={setPage}
+          className="mt-8"
+        />
       )}
     </div>
   );

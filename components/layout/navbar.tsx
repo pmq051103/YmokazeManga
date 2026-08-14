@@ -48,6 +48,22 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileOpen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   function submitSearch() {
     if (!query.trim()) return;
     setOpen(false);
@@ -55,7 +71,8 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-lilac-100/70 bg-white/80 backdrop-blur-md">
+    <>
+      <header className="sticky top-0 z-50 border-b border-lilac-100/70 bg-white/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sakura-400 to-lilac-500 text-lg font-display font-bold text-white shadow-card">
@@ -166,48 +183,86 @@ export function Navbar() {
         </button>
       </div>
 
+      </header>
+
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-lilac-100 bg-white md:hidden"
-          >
-            <nav className="container flex flex-col gap-1 py-3">
-              {NAV_LINKS.map((l, i) => (
-                <React.Fragment key={l.label}>
-                  <Link
-                    href={l.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-lilac-50"
-                    )}
-                  >
-                    {l.label}
-                  </Link>
-                  {i === 0 && (
+          <>
+            <motion.div
+              key="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm md:hidden"
+            />
+            <motion.aside
+              key="mobile-drawer"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.28, ease: "easeOut" }}
+              className="fixed right-0 top-0 z-[60] flex h-dvh w-72 max-w-[85vw] flex-col border-l border-lilac-100 bg-white shadow-soft md:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu điều hướng"
+            >
+              <div className="flex items-center justify-between border-b border-lilac-100 px-5 py-4">
+                <span className="font-display text-lg font-bold text-gradient">Yomikaze</span>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-full p-2 text-lilac-600 transition-colors hover:bg-lilac-50"
+                  aria-label="Đóng menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+                {NAV_LINKS.map((l, i) => (
+                  <React.Fragment key={l.label}>
                     <Link
-                      href="/manga"
+                      href={l.href}
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-lilac-50"
+                      className={cn(
+                        "rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-lilac-50 hover:text-lilac-700"
+                      )}
                     >
-                      Thư viện thể loại
+                      {l.label}
                     </Link>
-                  )}
-                </React.Fragment>
-              ))}
-              <button
-                onClick={toggleTheme}
-                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-lilac-50"
-              >
-                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                Chế độ {theme === "light" ? "tối" : "sáng"}
-              </button>
-            </nav>
-          </motion.div>
+                    {i === 0 && (
+                      <Link
+                        href="/manga"
+                        onClick={() => setMobileOpen(false)}
+                        className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-lilac-50 hover:text-lilac-700"
+                      >
+                        Thư viện thể loại
+                      </Link>
+                    )}
+                  </React.Fragment>
+                ))}
+
+                <div className="mt-auto border-t border-lilac-100 pt-3">
+                  <button
+                    onClick={toggleTheme}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-lilac-50"
+                  >
+                    {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                    Chế độ {theme === "light" ? "tối" : "sáng"}
+                  </button>
+                  <Button asChild variant="secondary" size="sm" className="mt-2 w-full justify-start">
+                    <Link href="/bookmarks" onClick={() => setMobileOpen(false)}>
+                      <BookMarked className="h-4 w-4" />
+                      Yêu thích
+                    </Link>
+                  </Button>
+                </div>
+              </nav>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

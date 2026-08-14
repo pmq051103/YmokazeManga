@@ -13,7 +13,7 @@ export function MangaGrid({ items }: { items: MangaSummary[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {items.map((m) => (
         <MangaCard key={`${m.source}-${m.id}`} manga={m} />
       ))}
@@ -23,7 +23,7 @@ export function MangaGrid({ items }: { items: MangaSummary[] }) {
 
 export function MangaGridSkeleton({ count = 12 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i}>
           <Skeleton className="aspect-[3/4] w-full" />

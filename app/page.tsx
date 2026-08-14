@@ -1,8 +1,9 @@
-import { Flame, Clock3, Sparkles } from "lucide-react";
+import { Flame, Clock3, Sparkles, Library, PlusCircle, LayoutGrid, Globe } from "lucide-react";
 import { mangaApi } from "@/lib/api";
 import { HeroBanner } from "@/components/home/hero-banner";
 import { Section } from "@/components/home/section";
 import { RankingSidebar } from "@/components/home/ranking-sidebar";
+import { StatsBar, StatItem } from "@/components/home/stats-bar";
 import { MangaCarousel } from "@/components/manga/manga-carousel";
 import { MangaGrid } from "@/components/manga/manga-grid";
 
@@ -21,6 +22,13 @@ export default async function HomePage() {
   const topRatedItems = topRated.status === "fulfilled" ? topRated.value.items : trendingItems;
   const genreItems = genres.status === "fulfilled" ? genres.value.items : [];
 
+  const stats: StatItem[] = [
+    { label: "Tổng số truyện", value: trending.status === "fulfilled" ? trending.value.totalItems ?? 0 : 0, suffix: "+", icon: Library },
+    { label: "Truyện mới đăng", value: latest.status === "fulfilled" ? latest.value.totalItems ?? 0 : 0, suffix: "+", icon: PlusCircle },
+    { label: "Số thể loại", value: genreItems.length, icon: LayoutGrid },
+    { label: "Nguồn dữ liệu", value: 2, icon: Globe },
+  ];
+
   // A couple of "hot" genres to spotlight with their own row on the homepage,
   // instead of dumping the whole genre list here (that now lives in the
   // header's "Thư viện thể loại" dropdown).
@@ -32,6 +40,8 @@ export default async function HomePage() {
   return (
     <>
       <HeroBanner items={trendingItems} />
+
+      <StatsBar stats={stats} />
 
       <div className="container grid gap-8 py-8 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">

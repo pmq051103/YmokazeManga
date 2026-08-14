@@ -41,6 +41,10 @@ export interface MangaDetail extends MangaSummary {
   author: string[];
   chapters: Chapter[];
   rating?: number;
+  /** Publication year, when the source provides it (e.g. MangaDex). */
+  year?: number;
+  /** ISO date the title was first published, when the source provides it. */
+  createdAt?: string;
 }
 
 export interface ChapterPages {
