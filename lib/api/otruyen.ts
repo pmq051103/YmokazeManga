@@ -99,6 +99,14 @@ function resolveThumb(thumb: string): string {
   return `${CDN_IMAGE_BASE}/${thumb}`;
 }
 
+/** Mongo ObjectIds embed their creation timestamp in the first 4 bytes. */
+function objectIdToDate(id?: string): string | undefined {
+  if (!id || !/^[0-9a-f]{24}$/i.test(id)) return undefined;
+  const ts = parseInt(id.slice(0, 8), 16);
+  if (Number.isNaN(ts)) return undefined;
+  return new Date(ts * 1000).toISOString();
+}
+
 function mapSummary(item: OtComicItem): MangaSummary {
   return {
     id: item._id,
@@ -110,6 +118,7 @@ function mapSummary(item: OtComicItem): MangaSummary {
     genres: mapGenres(item.category),
     latestChapter: item.chaptersLatest?.[0]?.chapter_name,
     updatedAt: item.updatedAt,
+    createdAt: objectIdToDate(item._id),
     source: SOURCE,
   };
 }

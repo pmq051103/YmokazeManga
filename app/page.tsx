@@ -1,4 +1,4 @@
-import { Flame, Clock3, Sparkles, Library, PlusCircle, LayoutGrid, Globe } from "lucide-react";
+import { Flame, Clock3, Sparkles, Library, PlayCircle, LayoutGrid, Globe } from "lucide-react";
 import { mangaApi } from "@/lib/api";
 import { HeroBanner } from "@/components/home/hero-banner";
 import { Section } from "@/components/home/section";
@@ -23,8 +23,11 @@ export default async function HomePage() {
   const genreItems = genres.status === "fulfilled" ? genres.value.items : [];
 
   const stats: StatItem[] = [
-    { label: "Tổng số truyện", value: trending.status === "fulfilled" ? trending.value.totalItems ?? 0 : 0, suffix: "+", icon: Library },
-    { label: "Truyện mới đăng", value: latest.status === "fulfilled" ? latest.value.totalItems ?? 0 : 0, suffix: "+", icon: PlusCircle },
+    // `newest` maps to OTruyen's "truyen-moi" endpoint, whose pagination.totalItems
+    // is the full catalogue count (everything on the site). `updated` maps to
+    // "dang-phat-hanh" which is only the ongoing subset, so it must stay smaller.
+    { label: "Tổng số truyện", value: latest.status === "fulfilled" ? latest.value.totalItems ?? 0 : 0, suffix: "+", icon: Library },
+    { label: "Truyện đang tiến hành", value: trending.status === "fulfilled" ? trending.value.totalItems ?? 0 : 0, suffix: "+", icon: PlayCircle },
     { label: "Số thể loại", value: genreItems.length, icon: LayoutGrid },
     { label: "Nguồn dữ liệu", value: 2, icon: Globe },
   ];

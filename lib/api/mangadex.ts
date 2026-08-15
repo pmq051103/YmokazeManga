@@ -124,6 +124,7 @@ function mapSummary(item: MdMangaItem): MangaSummary {
     status: mapStatus(item.attributes.status),
     genres: mapGenres(item.attributes.tags),
     updatedAt: item.attributes.updatedAt,
+    createdAt: item.attributes.createdAt,
     source: SOURCE,
   };
 }

@@ -24,6 +24,8 @@ export interface MangaSummary {
   genres: Genre[];
   latestChapter?: string;
   updatedAt?: string;
+  /** ISO date the title was first published, when the source provides it. */
+  createdAt?: string;
   source: MangaSource;
 }
 
